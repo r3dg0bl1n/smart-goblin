@@ -2,7 +2,7 @@
 
 namespace SmartGoblin\Components\Router;
 
-class Endpoint {
+final class Endpoint {
     private bool $restricted;
     private string $complexPath;
     private string $file;

@@ -8,7 +8,7 @@ enum DataType: string {
     case TEXT = "text";
 }
 
-class Response {
+final class Response {
     private string $status;
     private int $code;
     private DataType $type;

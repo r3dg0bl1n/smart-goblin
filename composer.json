@@ -1,6 +1,6 @@
 {
-    "name": "smartgoblin/framework",
-    "description": "Lightweight, fast and minimalistic PHP framework for monolithic apps",
+    "name": "smartgoblin/library",
+    "description": "Lightweight, fast and minimalistic PHP framework for monolithic apps.",
     "type": "library",
     "license": "MIT",
 
