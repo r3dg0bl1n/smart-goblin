@@ -2,6 +2,8 @@
 
 namespace SmartGoblin\Components\Router;
 
+use SmartGoblin\Helpers\Bee;
+
 final class Endpoint {
     private bool $restricted;
     private string $complexPath;
@@ -11,13 +13,10 @@ final class Endpoint {
         return new Endpoint($restricted, $method, $path, $fileName);
     }
 
-    public function __construct(bool $restricted, string $method, string $path, string $fileName) {
+    protected function __construct(bool $restricted, string $method, string $path, string $fileName) {
         $this->restricted = $restricted;
-        $this->complexPath = $path."#".$method;
-
-        $fileName = rtrim($fileName, ".php");
-        $fileName = rtrim($fileName,".html");
-        $this->file = ltrim($fileName, DIRECTORY_SEPARATOR);
+        $this->complexPath = "/".Bee::normalizePath($path)."#".$method;
+        $this->file = Bee::normalizePath($fileName, true);
     }
 
     public function getRestricted(): bool { return $this->restricted; }

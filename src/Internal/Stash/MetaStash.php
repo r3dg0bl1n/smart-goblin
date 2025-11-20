@@ -1,11 +1,15 @@
 <?php
 
-namespace SmartGoblin\Internal\Core\Craft;
+namespace SmartGoblin\Internal\Stash;
 
-final class Meta {
+final class MetaStash {
     private string $startRequestTime;
     
-    public function  __construct() {
+    public static function pack(): MetaStash {
+        return new MetaStash();
+    }
+
+    protected function  __construct() {
         $this->startRequestTime = microtime(true);
     }
 

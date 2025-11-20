@@ -22,6 +22,9 @@ final class Request {
         return null;
     }
     public function getComplexPath(): string { return $this->complexPath; }
+    public function isApi(): bool {
+        return str_starts_with($this->complexPath,"/api/");
+    }
 }
 
 ?>

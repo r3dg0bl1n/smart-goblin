@@ -2,6 +2,7 @@
 
 namespace SmartGoblin\Slaves;
 
+use PHPUnit\Runner\FileDoesNotExistException;
 use SmartGoblin\Exceptions\BadImplementationException;
 use SmartGoblin\Internal\Factory\SlaveFactory;
 use SmartGoblin\Internal\Core\Kernel;
@@ -12,56 +13,38 @@ use SmartGoblin\Components\Http\Response;
 
 final class KernelSlave extends SlaveFactory {
     private Kernel $kernel;
+    private bool $readyToWork = false;
 
     protected function __construct() {
         $this->kernel = new Kernel();
     }
 
     public function order(Config $config): void {
-        $this->kernel->setup($config);
+        $this->kernel->open($config);
+        $this->readyToWork = true;
     }
 
     public function work(): void {
         $response = null;
         
-        try {
+        if ($this->readyToWork) {
             
-            if(!$response) $this->kernel->processApi($response);
-            if(!$response) $this->kernel->processView($response);
+            try {
+                
+                if(!$response) $this->kernel->processApi($response);
+                if(!$response) $this->kernel->processView($response);
 
-        } catch(BadImplementationException $e) {
-            $response = Response::new(false, 500);
-            $response->setBody($e->getMessage());
-        }
-        
-        
-        $this->kernel->packMetadata();
-        if(!$response) {
-            $response = Response::new(false, 301);
-            $this->redirect($response);
+            } catch(BadImplementationException | FileDoesNotExistException $e) {
+                $response = Response::new(false, 500);
+                $response->setBody($e->getMessage());
+            }
+
         } else {
-            $this->complete($response);
-        }
-    }
-
-    private function complete(Response $response): void {
-        http_response_code($response->getCode());
-        header("Content-Type: ".$response->getType()->value."; charset=utf-8");
-
-        if ($response->getType() == DataType::JSON) {
-            echo json_encode([
-                "status" => $response->getStatus(),
-                "data" => $response->getData()
-            ]);
+            $response = Response::new(false,500);
+            $response->setBody("Kernel Slave does not know what is its purpose yet! Make sure to execute order method first.");
         }
         
-        exit(0);
-    }
-
-    private function redirect($response): void {
-        http_response_code($response->getCode());
-        header("Location: /".$this->kernel->getConfig()->getDefaultPathRedirect(), true);
-
+        $this->kernel->close($response);
         exit(0);
     }
 }

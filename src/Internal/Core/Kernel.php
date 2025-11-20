@@ -2,42 +2,67 @@
 
 namespace SmartGoblin\Internal\Core;
 
-use SmartGoblin\Internal\Core\Craft\Meta;
+use PHPUnit\Runner\FileDoesNotExistException;
+
 use SmartGoblin\Components\Core\Config;
 use SmartGoblin\Components\Http\Response;
 use SmartGoblin\Components\Http\Request;
+use SmartGoblin\Components\Http\DataType;
+
+use SmartGoblin\Internal\Stash\MetaStash;
+use SmartGoblin\Internal\Stash\HeaderStash;
+use SmartGoblin\Internal\Stash\AuthorizationStash;
+
+use SmartGoblin\Helpers\Bee;
+
+use SmartGoblin\Internal\Worker\HeaderWorker;
+use SmartGoblin\Internal\Worker\MetaWorker;
 
 use SmartGoblin\Exceptions\BadImplementationException;
-use SmartGoblin\Helpers\Bee;
 
 use Dotenv\Dotenv;
 
 final class Kernel {
-    private Meta $meta;
+
     private Config $config;
     private Request $request;
+
+    private MetaStash $metaStash;
+    private HeaderStash $headerStash;
+    private AuthorizationStash $authorizationStash;
 
     private array $apiRoutes;
     private array $viewRoutes;
     
     public function  __construct() {
-        $this->meta = new Meta();
+        $this->metaStash = MetaStash::pack();
     }
 
-    public function setup(Config $config): void {
+    public function open(Config $config): void {
         $this->config = $config;
-        Dotenv::createImmutable($config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
 
+        Dotenv::createImmutable($config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
+        
         $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"));
+        
+        $this->headerStash = HeaderStash::pack($this->request->isApi(), $config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"]);
+        HeaderWorker::dump($this->headerStash);
     }
 
     public function processApi(&$response): void {
         $foundEndpoint = $this->apiRoutes[$this->request->getComplexPath()];
 
         if ($foundEndpoint) {
-            $fn = require_once $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint->getFile() . ".php";
+            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint->getFile() . ".php";
+            if(!file_exists($filePath)) {
+                $response = null;
+                throw new FileDoesNotExistException("API file could not be loaded, it does not exist. (Payload: $filePath)");
+            }
+            
+            $fn = require_once $filePath;
             if (is_callable($fn)) $response = $fn($this->request);
-            if (!$response instanceof Response) { 
+
+            if (!($response instanceof Response)) { 
                 $response = null;
                 throw new BadImplementationException("API file {$foundEndpoint->getFile()} expected to return Response object.");
             }
@@ -48,14 +73,36 @@ final class Kernel {
         $foundEndpoint = $this->viewRoutes[$this->request->getComplexPath()];
 
         if ($foundEndpoint) {
-            readFile($this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint['file_path'] . ".html");
+            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint['file_path'] . ".html";
+            if(!file_exists($filePath)) {
+                $response = null;
+                throw new FileDoesNotExistException("View file could not be rendered, it does not exist. (Payload: $filePath)");
+            }
+
+            readFile($filePath);
             $response = Response::new(true, 200);
         }
     }
 
-    public function packMetadata(): void {
-        if (Bee::isDev()) {
-            Header("X-Meta-Request-Time: " . microtime(true) - $this->meta->getStartRequestTime());
+    public function close(Response $response): void {
+        if(!$response) {
+            $response = Response::new(false, 301);
+            HeaderWorker::addAndDump($this->headerStash, "Location", "/".$this->config->getDefaultPathRedirect());
+        }
+
+        http_response_code($response->getCode());
+
+        if(Bee::isDev()) MetaWorker::dump($this->metaStash, $this->headerStash);
+
+        $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
+        HeaderWorker::addAndDump($this->headerStash, "Content-Type", "{$type->value}; charset=utf-8");
+
+        if ($type == DataType::JSON) {
+            echo json_encode([
+                "status" => $response->getStatus(),
+                "msg" => $response->getMessage(),
+                "data" => $response->getData()
+            ]);
         }
     }
 

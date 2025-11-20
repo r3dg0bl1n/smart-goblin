@@ -12,6 +12,7 @@ abstract class SlaveFactory {
         return new static();
     }
 
+    abstract protected function __construct();
     abstract public function order(Config $config): void;
     abstract public function work(): void;
 }

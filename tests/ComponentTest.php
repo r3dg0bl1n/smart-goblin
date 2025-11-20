@@ -4,7 +4,6 @@ namespace Tests;
 use PHPUnit\Framework\TestCase;
 
 use SmartGoblin\Components\Core\Config;
-use SmartGoblin\Components\Http\DataType;
 use SmartGoblin\Components\Http\Request;
 use SmartGoblin\Components\Http\Response;
 use SmartGoblin\Components\Router\Endpoint;
@@ -14,17 +13,18 @@ use SmartGoblin\Components\Router\Endpoint;
 final class ComponentTest extends TestCase
 {
     public function testCoreConfig(): void {
-        $config = Config::new("/home/user/project/main", "main", false, "/login", "public");
+        $config = Config::new("/home/user/project/main", "main", false);
         $config->configureAllowedHosts(["www.mydomain.net"]);
+        $config->configureUnauthorizedRedirects("/login", "public");
         $config->configureApi([
             Endpoint::new(false, "POST", "/sayHello", "SayHello")
         ]);
-        $config->configureViews([
+        $config->configureView([
             Endpoint::new(false, "GET", "/", "main")
         ]);
 
         $this->assertInstanceOf(Config::class, $config);
-
+        
     }
 
     public function testHttpRequest(): void
@@ -40,7 +40,7 @@ final class ComponentTest extends TestCase
 
     public function testHttpResponse(): void
     {
-        $response = Response::new(true, 200, DataType::JSON);
+        $response = Response::new(true, 200);
         $response->setBody("Everything went alright!",[
             "ping" => "pong"
         ]);
@@ -49,8 +49,8 @@ final class ComponentTest extends TestCase
 
         $this->assertSame("OK", $response->getStatus());
         $this->assertSame(200, $response->getCode());
+        $this->assertSame("Everything went alright!", $response->getMessage());
         $this->assertSame("pong", $response->getData()["ping"]);
-        $this->assertSame(DataType::JSON, $response->getType());
     }
 
     public function testRouterEndpoint(): void
