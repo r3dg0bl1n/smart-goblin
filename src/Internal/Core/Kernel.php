@@ -38,15 +38,35 @@ final class Kernel {
         $this->metaStash = MetaStash::pack();
     }
 
-    public function open(Config $config): void {
-        $this->config = $config;
-
-        Dotenv::createImmutable($config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
+    public function open(): void {
+        Dotenv::createImmutable($this->config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
         
         $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"));
         
-        $this->headerStash = HeaderStash::pack($this->request->isApi(), $config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"]);
+        $this->headerStash = HeaderStash::pack($this->request->isApi(), $this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"]);
         HeaderWorker::dump($this->headerStash);
+    }
+
+    public function close(Response $response): void {
+        if(!$response) {
+            $response = Response::new(false, 301);
+            HeaderWorker::addAndDump($this->headerStash, "Location", "/".$this->config->getDefaultPathRedirect());
+        }
+
+        http_response_code($response->getCode());
+
+        if(Bee::isDev()) MetaWorker::dump($this->metaStash, $this->headerStash);
+
+        $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
+        HeaderWorker::addAndDump($this->headerStash, "Content-Type", "{$type->value}; charset=utf-8");
+
+        if ($type == DataType::JSON) {
+            echo json_encode([
+                "status" => $response->getStatus(),
+                "msg" => $response->getMessage(),
+                "data" => $response->getData()
+            ]);
+        }
     }
 
     public function processApi(&$response): void {
@@ -84,28 +104,6 @@ final class Kernel {
         }
     }
 
-    public function close(Response $response): void {
-        if(!$response) {
-            $response = Response::new(false, 301);
-            HeaderWorker::addAndDump($this->headerStash, "Location", "/".$this->config->getDefaultPathRedirect());
-        }
 
-        http_response_code($response->getCode());
-
-        if(Bee::isDev()) MetaWorker::dump($this->metaStash, $this->headerStash);
-
-        $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
-        HeaderWorker::addAndDump($this->headerStash, "Content-Type", "{$type->value}; charset=utf-8");
-
-        if ($type == DataType::JSON) {
-            echo json_encode([
-                "status" => $response->getStatus(),
-                "msg" => $response->getMessage(),
-                "data" => $response->getData()
-            ]);
-        }
-    }
-
-    public function getConfig(): Config { return $this->config; }
-    public function getRequest(): Request { return $this->request; }
+    public function setConfig(Config $config): void { $this->config = $config; }
 }

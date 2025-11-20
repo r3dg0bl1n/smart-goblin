@@ -13,22 +13,23 @@ use SmartGoblin\Components\Http\Response;
 
 final class KernelSlave extends SlaveFactory {
     private Kernel $kernel;
-    private bool $readyToWork = false;
+    private bool $ready = false;
 
     protected function __construct() {
         $this->kernel = new Kernel();
     }
 
     public function order(Config $config): void {
-        $this->kernel->open($config);
-        $this->readyToWork = true;
+        $this->kernel->setConfig($config);
+        $this->ready = true;
     }
 
     public function work(): void {
         $response = null;
         
-        if ($this->readyToWork) {
-            
+        if ($this->ready) {
+            $this->kernel->open();
+
             try {
                 
                 if(!$response) $this->kernel->processApi($response);
@@ -39,12 +40,14 @@ final class KernelSlave extends SlaveFactory {
                 $response->setBody($e->getMessage());
             }
 
+            $this->kernel->close($response);
         } else {
-            $response = Response::new(false,500);
-            $response->setBody("Kernel Slave does not know what is its purpose yet! Make sure to execute order method first.");
+            http_response_code(500);
+            //Add logging system for errors?
+            //$response = Response::new(false,500);
+            //$response->setBody("Kernel Slave does not know what is its purpose yet! Make sure to execute order method first.");
         }
         
-        $this->kernel->close($response);
         exit(0);
     }
 }
