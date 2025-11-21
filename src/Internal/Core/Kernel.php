@@ -31,16 +31,18 @@ final class Kernel {
     private HeaderStash $headerStash;
     private AuthorizationStash $authorizationStash;
 
-    private array $apiRoutes;
-    private array $viewRoutes;
+    private array $apiRoutes = [];
+    private array $viewRoutes = [];
     
     public function  __construct() {
-        $this->metaStash = MetaStash::pack();
+        
     }
 
     public function open(): void {
         Dotenv::createImmutable($this->config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
         
+        $this->metaStash = MetaStash::pack();
+
         $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"));
         
         $this->headerStash = HeaderStash::pack($this->request->isApi(), $this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"] ?? "");
