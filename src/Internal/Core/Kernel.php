@@ -43,7 +43,7 @@ final class Kernel {
         
         $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"));
         
-        $this->headerStash = HeaderStash::pack($this->request->isApi(), $this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"]);
+        $this->headerStash = HeaderStash::pack($this->request->isApi(), $this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"] ?? "");
         HeaderWorker::dump($this->headerStash);
     }
 

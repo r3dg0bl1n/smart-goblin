@@ -35,7 +35,7 @@ final class HeaderStash {
             ]);
         }
         
-        $origin = $origin ?? ''; // TODO: Do more research about HTTP_ORIGIN
+        $origin = $origin ?? ""; // TODO: Do more research about HTTP_ORIGIN
         if (in_array($origin, $allowedHosts, true)) {
             array_merge($this->headerList, [
                 "Access-Control-Allow-Origin" => "https://$origin",
