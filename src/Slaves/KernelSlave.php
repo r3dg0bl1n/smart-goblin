@@ -15,7 +15,7 @@ final class KernelSlave extends SlaveFactory {
     private Kernel $kernel;
     private bool $ready = false;
 
-    private function __construct() {
+    protected function __construct() {
         $this->kernel = new Kernel();
     }
 
