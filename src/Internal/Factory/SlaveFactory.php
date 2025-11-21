@@ -5,10 +5,7 @@ namespace SmartGoblin\Internal\Factory;
 use SmartGoblin\Components\Core\Config;
 
 abstract class SlaveFactory {
-    public static function call(...$args): static {
-        if (!empty($args)) {
-            return new static(...$args);
-        }
+    public static function call(): static {
         return new static();
     }
 

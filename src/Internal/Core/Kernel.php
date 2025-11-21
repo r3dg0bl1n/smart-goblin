@@ -29,9 +29,6 @@ final class Kernel {
     private MetaStash $metaStash;
     private HeaderStash $headerStash;
     private AuthorizationStash $authorizationStash;
-
-    private array $apiRoutes = [];
-    private array $viewRoutes = [];
     
     public function  __construct() {
         
@@ -71,10 +68,10 @@ final class Kernel {
     }
 
     public function processApi(): ?Response {
-        $foundEndpoint = $this->apiRoutes[$this->request->getComplexPath()];
+        $foundEndpoint = $this->config->getApiRoutes()[$this->request->getComplexPath()];
 
         if ($foundEndpoint) {
-            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint->getFile() . ".php";
+            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "api" . DIRECTORY_SEPARATOR . $foundEndpoint->getFile() . ".php";
             if(!file_exists($filePath)) {
                 throw new EndpointFileDoesNotExist("API file could not be loaded, it does not exist. (Payload: $filePath)");
             }
@@ -93,10 +90,10 @@ final class Kernel {
     }
 
     public function processView(): ?Response {
-        $foundEndpoint = $this->viewRoutes[$this->request->getComplexPath()];
+        $foundEndpoint = $this->config->getViewRoutes()[$this->request->getComplexPath()];
 
         if ($foundEndpoint) {
-            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint['file_path'] . ".html";
+            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR  . $foundEndpoint->getFile() . ".html";
             if(!file_exists($filePath)) {
                 throw new EndpointFileDoesNotExist("View file could not be rendered, it does not exist. (Payload: $filePath)");
             }
