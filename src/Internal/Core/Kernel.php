@@ -71,39 +71,42 @@ final class Kernel {
         }
     }
 
-    public function processApi(&$response): void {
+    public function processApi(): ?Response {
         $foundEndpoint = $this->apiRoutes[$this->request->getComplexPath()];
 
         if ($foundEndpoint) {
             $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint->getFile() . ".php";
             if(!file_exists($filePath)) {
-                $response = null;
                 throw new FileDoesNotExistException("API file could not be loaded, it does not exist. (Payload: $filePath)");
             }
             
             $fn = require_once $filePath;
+            $response = null;
             if (is_callable($fn)) $response = $fn($this->request);
 
-            if (!($response instanceof Response)) { 
-                $response = null;
+            if ($response instanceof Response) return $response;
+            else { 
                 throw new BadImplementationException("API file {$foundEndpoint->getFile()} expected to return Response object.");
             }
         }
+
+        return null;
     }
 
-    public function processView(&$response): void {
+    public function processView(): ?Response {
         $foundEndpoint = $this->viewRoutes[$this->request->getComplexPath()];
 
         if ($foundEndpoint) {
             $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . $foundEndpoint['file_path'] . ".html";
             if(!file_exists($filePath)) {
-                $response = null;
                 throw new FileDoesNotExistException("View file could not be rendered, it does not exist. (Payload: $filePath)");
             }
 
             readFile($filePath);
-            $response = Response::new(true, 200);
+            return Response::new(true, 200);
         }
+
+        return null;
     }
 
 
