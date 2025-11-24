@@ -65,7 +65,7 @@ final class HeaderSlave {
         else HeaderWorker::writeHeader("Cache-Control", "private, max-age=0, no-cache, must-revalidate");
     }
 
-    public static function deliver(HeaderStash &$stash): void {
+    public static function dump(HeaderStash &$stash): void {
         foreach($stash->getHeaderList() as $key => $value) header($key.": ".$value);
         foreach($stash->getRemoveHeaderList() as $value) header_remove($value);
 

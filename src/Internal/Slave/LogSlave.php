@@ -54,7 +54,7 @@ final class LogSlave {
         LogWorker::log("=======================================================");
     }
 
-    public static function deliver(LogStash &$stash): void {
+    public static function dump(LogStash &$stash): void {
         $textBlock = "";
         foreach($stash->getLogList() as $obj) $textBlock .= "[".$obj["prefix"]."] ".$obj["value"]."\n";
         self::writeIntoFile($textBlock);

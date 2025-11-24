@@ -11,7 +11,7 @@ class LogWorker {
 
     private static bool $working = false;
     private static LogStash $stash;
-        public static function __sendToSlave(): void { LogSlave::deliver(self::$stash); }
+        public static function __delegateDumpToSlave(): void { LogSlave::dump(self::$stash); }
 
     #/ VARIABLES
     #----------------------------------------------------------------------

@@ -91,7 +91,7 @@ final class Kernel {
 
         $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
         HeaderWorker::writeHeader( "Content-Type", "{$type->value}; charset=utf-8");
-        HeaderWorker::__sendToSlave();
+        HeaderWorker::__delegateDumpToSlave();
 
         if ($type == DataType::JSON) {
             echo json_encode([
@@ -107,7 +107,7 @@ final class Kernel {
         $elapsedTime = round(($diff - floor($diff)) * 1000);
 
         LogSlave::writeCloseLogs($this->request, $elapsedTime);
-        LogWorker::__sendToSlave();
+        LogWorker::__delegateDumpToSlave();
     }
 
     public function processApi(): ?Response {

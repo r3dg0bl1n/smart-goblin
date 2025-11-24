@@ -11,7 +11,7 @@ class HeaderWorker {
 
     private static bool $working = false;
     private static HeaderStash $stash;
-        public static function __sendToSlave(): void { HeaderSlave::deliver(self::$stash); }
+        public static function __delegateDumpToSlave(): void { HeaderSlave::dump(self::$stash); }
 
     #/ VARIABLES
     #----------------------------------------------------------------------
