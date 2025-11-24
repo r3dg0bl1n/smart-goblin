@@ -3,7 +3,6 @@
     "description": "Lightweight, fast and minimalistic PHP framework for monolithic apps.",
     "type": "library",
     "license": "MIT",
-
     "autoload": {
         "psr-4": {
             "SmartGoblin\\": "src/"

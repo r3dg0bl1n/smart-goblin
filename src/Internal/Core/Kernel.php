@@ -7,14 +7,12 @@ use SmartGoblin\Components\Http\Response;
 use SmartGoblin\Components\Http\Request;
 use SmartGoblin\Components\Http\DataType;
 
-use SmartGoblin\Internal\Stash\MetaStash;
+use SmartGoblin\Internal\Stash\LoggingStash;
 use SmartGoblin\Internal\Stash\HeaderStash;
 use SmartGoblin\Internal\Stash\AuthorizationStash;
 
-use SmartGoblin\Helpers\Bee;
-
 use SmartGoblin\Internal\Worker\HeaderWorker;
-use SmartGoblin\Internal\Worker\MetaWorker;
+use SmartGoblin\Internal\Worker\LoggingWorker;
 
 use SmartGoblin\Exceptions\BadImplementationException;
 use SmartGoblin\Exceptions\EndpointFileDoesNotExist;
@@ -26,34 +24,42 @@ final class Kernel {
     private Config $config;
     private Request $request;
 
-    private MetaStash $metaStash;
+    private LoggingStash $loggingStash;
     private HeaderStash $headerStash;
     private AuthorizationStash $authorizationStash;
+
+    private float $startRequestTime;
     
     public function  __construct() {
         
     }
 
     public function open(): void {
-        Dotenv::createImmutable($this->config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
-        
-        $this->metaStash = MetaStash::pack();
+        $this->startRequestTime = microtime(true);
 
-        $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"));
+        define("SITE_PATH", $this->config->getSitePath());
+
+        Dotenv::createImmutable($this->config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
+
+        // Add security for remote address
+        $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"), $_SERVER["REMOTE_ADDR"]);
         
+        $this->loggingStash = LoggingStash::pack();
+        LoggingWorker::addOpenLogs($this->loggingStash, $this->request);
+
         $this->headerStash = HeaderStash::pack($this->request->isApi(), $this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"] ?? "");
         HeaderWorker::dump($this->headerStash);
     }
 
     public function close(Response $response): void {
+        session_write_close();
+
         if(!$response) {
             $response = Response::new(false, 301);
             HeaderWorker::addAndDump($this->headerStash, "Location", "/".$this->config->getDefaultPathRedirect());
         }
 
         http_response_code($response->getCode());
-
-        if(Bee::isDev()) MetaWorker::dump($this->metaStash, $this->headerStash);
 
         $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
         HeaderWorker::addAndDump($this->headerStash, "Content-Type", "{$type->value}; charset=utf-8");
@@ -65,6 +71,14 @@ final class Kernel {
                 "data" => $response->getData()
             ]);
         }
+
+        if (function_exists("fastcgi_finish_request")) fastcgi_finish_request();
+
+        $diff = microtime(true) - $this->startRequestTime;
+        $elapsedTime = round(($diff - floor($diff)) * 1000);
+
+        LoggingWorker::addCloseLogs($this->loggingStash, $this->request, $elapsedTime);
+        LoggingWorker::dump($this->loggingStash);
     }
 
     public function processApi(): ?Response {
