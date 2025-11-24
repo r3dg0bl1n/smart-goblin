@@ -3,10 +3,29 @@
 namespace SmartGoblin\Components\Http;
 
 final class Request {
+    #----------------------------------------------------------------------
+    #\ VARIABLES
+
     private string $internalID;
+        public function getInternalID(): string { return $this->internalID; }
     private array $data;
+        public function getDataItem(string $key): string|int|bool|null {
+            if(isset($this->data[$key])) {
+                return trim(strip_tags($this->data[$key]));
+            }
+
+            return null;
+        }
     private string $complexPath;
+        public function getComplexPath(): string { return $this->complexPath; }
     private array $originInfo = [];
+        public function getOriginInfo(): array { return $this->originInfo; }
+
+    #/ VARIABLES
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ INIT
 
     public function __construct(string $uri, string $method, string $dataStream, string $remoteAddress) {
         $this->internalID = bin2hex(random_bytes(8));
@@ -20,19 +39,26 @@ final class Request {
         $this->originInfo["IP"] = $remoteAddress;
     }
 
-    public function getInternalID(): string { return $this->internalID; }
-    public function getDataItem(string $key): string|int|bool|null {
-        if(isset($this->data[$key])) {
-            return trim(strip_tags($this->data[$key]));
-        }
+    #/ INIT
+    #----------------------------------------------------------------------
+    
+    #----------------------------------------------------------------------
+    #\ PRIVATE FUNCTIONS
 
-        return null;
-    }
-    public function getComplexPath(): string { return $this->complexPath; }
+
+
+    #/ PRIVATE FUNCTIONS
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ METHODS
+
     public function isApi(): bool {
         return str_starts_with($this->complexPath,"/api/");
     }
-    public function getOriginInfo(): array { return $this->originInfo; }
+
+    #/ METHODS
+    #----------------------------------------------------------------------  
 }
 
 ?>

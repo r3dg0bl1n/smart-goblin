@@ -9,10 +9,23 @@ enum DataType: string {
 }
 
 final class Response {
+    #----------------------------------------------------------------------
+    #\ VARIABLES
+
     private string $status;
+        public function getStatus(): string { return $this->status; }
     private int $code;
+        public function getCode(): int { return $this->code; }
     private string $message = "";
+        public function getMessage(): string { return $this->message; }
     private array $data = [];
+        public function getData(): array { return $this->data; }
+    
+    #/ VARIABLES
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ INIT
 
     public static function new(bool $success, int $code): Response {
         return new Response($success, $code);
@@ -23,15 +36,27 @@ final class Response {
         $this->code = $code;
     }
 
+    #/ INIT
+    #----------------------------------------------------------------------
+    
+    #----------------------------------------------------------------------
+    #\ PRIVATE FUNCTIONS
+
+
+
+    #/ PRIVATE FUNCTIONS
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ METHODS
+
     public function setBody(string $message = "", array $data = []): void {
         $this->message = $message;
         $this->data = $data;
     }
 
-    public function getStatus(): string { return $this->status; }
-    public function getCode(): int { return $this->code; }
-    public function getMessage(): string { return $this->message; }
-    public function getData(): array { return $this->data; }    
+    #/ METHODS
+    #----------------------------------------------------------------------
 }
 
 ?>

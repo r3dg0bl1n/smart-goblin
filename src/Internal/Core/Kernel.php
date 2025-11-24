@@ -2,53 +2,81 @@
 
 namespace SmartGoblin\Internal\Core;
 
+use Closure;
+use ReflectionFunction;
 use SmartGoblin\Components\Core\Config;
 use SmartGoblin\Components\Http\Response;
 use SmartGoblin\Components\Http\Request;
 use SmartGoblin\Components\Http\DataType;
 
-use SmartGoblin\Internal\Stash\LoggingStash;
-use SmartGoblin\Internal\Stash\HeaderStash;
-use SmartGoblin\Internal\Stash\AuthorizationStash;
+use SmartGoblin\Worker\HeaderWorker;
+use SmartGoblin\Worker\LogWorker;
 
-use SmartGoblin\Internal\Worker\HeaderWorker;
-use SmartGoblin\Internal\Worker\LoggingWorker;
+use SmartGoblin\Internal\Slave\LogSlave;
+use SmartGoblin\Internal\Slave\HeaderSlave;
 
 use SmartGoblin\Exceptions\BadImplementationException;
 use SmartGoblin\Exceptions\EndpointFileDoesNotExist;
 
+use SmartGoblin\Worker\Bee;
+
 use Dotenv\Dotenv;
 
 final class Kernel {
+    #----------------------------------------------------------------------
+    #\ VARIABLES
 
     private Config $config;
+        public function setConfig(Config $config): void { $this->config = $config; }
+
     private Request $request;
-
-    private LoggingStash $loggingStash;
-    private HeaderStash $headerStash;
-    private AuthorizationStash $authorizationStash;
-
     private float $startRequestTime;
-    
+
+    #/ VARIABLES
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ INIT
+
     public function  __construct() {
         
     }
+
+    #/ INIT
+    #----------------------------------------------------------------------
+    
+    #----------------------------------------------------------------------
+    #\ PRIVATE FUNCTIONS
+
+
+
+    #/ PRIVATE FUNCTIONS
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ METHODS
+    
+    public function isApiRequest(): bool { return $this->request->isApi(); }
 
     public function open(): void {
         $this->startRequestTime = microtime(true);
 
         define("SITE_PATH", $this->config->getSitePath());
 
-        Dotenv::createImmutable($this->config->getSitePath() . DIRECTORY_SEPARATOR . "config")->load();
+        $envPath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR;
+        Dotenv::createImmutable($envPath)->load();
+        Dotenv::createImmutable($envPath . (Bee::isDev() ? ".env.dev" : ".env.prod"))->safeLoad();
+        
 
         // Add security for remote address
         $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"), $_SERVER["REMOTE_ADDR"]);
         
-        $this->loggingStash = LoggingStash::pack();
-        LoggingWorker::addOpenLogs($this->loggingStash, $this->request);
+        LogSlave::zap();
+        LogSlave::writeOpenLogs($this->request);
 
-        $this->headerStash = HeaderStash::pack($this->request->isApi(), $this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"] ?? "");
-        HeaderWorker::dump($this->headerStash);
+        HeaderSlave::zap();
+        HeaderSlave::writeSecurityHeaders($this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"] ?? "");
+        HeaderSlave::writeUtilityHeaders($this->request->isApi());
     }
 
     public function close(Response $response): void {
@@ -56,13 +84,14 @@ final class Kernel {
 
         if(!$response) {
             $response = Response::new(false, 301);
-            HeaderWorker::addAndDump($this->headerStash, "Location", "/".$this->config->getDefaultPathRedirect());
+            HeaderWorker::writeHeader( "Location", "/".$this->config->getDefaultPathRedirect());
         }
 
         http_response_code($response->getCode());
 
         $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
-        HeaderWorker::addAndDump($this->headerStash, "Content-Type", "{$type->value}; charset=utf-8");
+        HeaderWorker::writeHeader( "Content-Type", "{$type->value}; charset=utf-8");
+        HeaderWorker::__sendToSlave();
 
         if ($type == DataType::JSON) {
             echo json_encode([
@@ -77,8 +106,8 @@ final class Kernel {
         $diff = microtime(true) - $this->startRequestTime;
         $elapsedTime = round(($diff - floor($diff)) * 1000);
 
-        LoggingWorker::addCloseLogs($this->loggingStash, $this->request, $elapsedTime);
-        LoggingWorker::dump($this->loggingStash);
+        LogSlave::writeCloseLogs($this->request, $elapsedTime);
+        LogWorker::__sendToSlave();
     }
 
     public function processApi(): ?Response {
@@ -119,7 +148,6 @@ final class Kernel {
         return null;
     }
 
-
-    public function setConfig(Config $config): void { $this->config = $config; }
-    public function isApiRequest(): bool { return $this->request->isApi(); }
+    #/ METHODS
+    #----------------------------------------------------------------------  
 }

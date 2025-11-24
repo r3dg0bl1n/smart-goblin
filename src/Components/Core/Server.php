@@ -1,30 +1,56 @@
 <?php
 
-namespace SmartGoblin\Slaves;
+namespace SmartGoblin\Components\Core;
 
 use SmartGoblin\Exceptions\BadImplementationException;
 use SmartGoblin\Exceptions\EndpointFileDoesNotExist;
 
-use SmartGoblin\Internal\Factory\SlaveFactory;
 use SmartGoblin\Internal\Core\Kernel;
 
 use SmartGoblin\Components\Core\Config;
 use SmartGoblin\Components\Http\Response;
 
-final class KernelSlave extends SlaveFactory {
+final class Server {
+    #----------------------------------------------------------------------
+    #\ VARIABLES
+
     private Kernel $kernel;
     private bool $ready = false;
 
-    protected function __construct() {
+    #/ VARIABLES
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ INIT
+
+    public static function new(): Server {
+        return new Server();
+    }
+
+    private function __construct() {
         $this->kernel = new Kernel();
     }
 
-    public function order(Config $config): void {
+    public function configure(Config $config): void {
         $this->kernel->setConfig($config);
         $this->ready = true;
     }
 
-    public function work(): void {
+    #/ INIT
+    #----------------------------------------------------------------------
+    
+    #----------------------------------------------------------------------
+    #\ PRIVATE FUNCTIONS
+
+
+
+    #/ PRIVATE FUNCTIONS
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ METHODS
+
+    public function run(): void {
         $response = null;
         
         if ($this->ready) {
@@ -46,4 +72,7 @@ final class KernelSlave extends SlaveFactory {
         
         exit(0);
     }
+
+    #/ METHODS
+    #----------------------------------------------------------------------
 }

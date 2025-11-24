@@ -1,17 +1,17 @@
 <?php
 
-namespace SmartGoblin\Internal\Stash;
+namespace SmartGoblin\Worker;
 
-final class HeaderStash {
+use SmartGoblin\Internal\Slave\LogSlave;
+use SmartGoblin\Internal\Stash\LogStash;
 
+class LogWorker {
     #----------------------------------------------------------------------
     #\ VARIABLES
 
-    private array $headerList = [];
-        public function getHeaderList(): array { return $this->headerList; }
-
-    private array $removeHeaderList = [];
-        public function getRemoveHeaderList(): array { return $this->removeHeaderList; }
+    private static bool $working = false;
+    private static LogStash $stash;
+        public static function __sendToSlave(): void { LogSlave::deliver(self::$stash); }
 
     #/ VARIABLES
     #----------------------------------------------------------------------
@@ -19,10 +19,13 @@ final class HeaderStash {
     #----------------------------------------------------------------------
     #\ INIT
 
-    public function  __construct() {
-        
+    public static function call(): void {
+        if(!self::$working) {
+            self::$working = true;
+            self::$stash = new LogStash();
+        }
     }
-    
+
     #/ INIT
     #----------------------------------------------------------------------
     
@@ -30,24 +33,17 @@ final class HeaderStash {
     #\ PRIVATE FUNCTIONS
 
 
-    
+
     #/ PRIVATE FUNCTIONS
     #----------------------------------------------------------------------
 
     #----------------------------------------------------------------------
     #\ METHODS
 
-    public function addHeader(string $key, string $value): void {
-        $this->headerList[$key] = $value;
-    }
-
-    public function addHeaderToRemove(string $key): void {
-        $this->removeHeaderList[] = $key;
-    }
-
-    public function empty(): void {
-        $this->headerList = [];
-        $this->removeHeaderList = [];
+    public static function log(string $text): void {
+        if(self::$working) {
+            self::$stash->addLog(date("Y-m-d H:i:s"), $text);
+        }
     }
 
     #/ METHODS

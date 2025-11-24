@@ -1,17 +1,12 @@
 <?php
 
-namespace SmartGoblin\Internal\Stash;
+namespace SmartGoblin\Worker;
 
-final class HeaderStash {
-
+class Bee {
     #----------------------------------------------------------------------
     #\ VARIABLES
 
-    private array $headerList = [];
-        public function getHeaderList(): array { return $this->headerList; }
-
-    private array $removeHeaderList = [];
-        public function getRemoveHeaderList(): array { return $this->removeHeaderList; }
+    
 
     #/ VARIABLES
     #----------------------------------------------------------------------
@@ -19,10 +14,8 @@ final class HeaderStash {
     #----------------------------------------------------------------------
     #\ INIT
 
-    public function  __construct() {
-        
-    }
-    
+
+
     #/ INIT
     #----------------------------------------------------------------------
     
@@ -30,24 +23,29 @@ final class HeaderStash {
     #\ PRIVATE FUNCTIONS
 
 
-    
+
     #/ PRIVATE FUNCTIONS
     #----------------------------------------------------------------------
 
     #----------------------------------------------------------------------
     #\ METHODS
 
-    public function addHeader(string $key, string $value): void {
-        $this->headerList[$key] = $value;
-    }
+    public static function isDev() { return getenv("STATE") === "dev"; }
+    
+    public static function normalizePath(string $path, bool $cleanExtension = false): string {
+        $newPath = ltrim($path, "/\\");
+        $newPath = preg_replace("#[\\/]+#", "/", $newPath);
 
-    public function addHeaderToRemove(string $key): void {
-        $this->removeHeaderList[] = $key;
-    }
+        if($cleanExtension) {
+            $extensions = [".php", ".html", ".phtml", ".txt". ".md", ".log"];
+            foreach($extensions as $ext) {
+                if(str_ends_with($newPath, $ext)) {
+                    $newPath = substr($newPath, 0, -strlen($ext));
+                }
+            }
+        }
 
-    public function empty(): void {
-        $this->headerList = [];
-        $this->removeHeaderList = [];
+        return $newPath;
     }
 
     #/ METHODS

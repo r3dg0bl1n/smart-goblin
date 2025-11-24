@@ -2,12 +2,24 @@
 
 namespace SmartGoblin\Components\Router;
 
-use SmartGoblin\Helpers\Bee;
+use SmartGoblin\Worker\Bee;
 
 final class Endpoint {
+    #----------------------------------------------------------------------
+    #\ VARIABLES
+
     private bool $restricted;
+        public function getRestricted(): bool { return $this->restricted; }
     private string $complexPath;
+        public function getComplexPath(): string { return $this->complexPath; }
     private string $file;
+        public function getFile(): string { return $this->file; }
+    
+    #/ VARIABLES
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ INIT
 
     public static function api(bool $restricted, string $httpMethod, string $uri, string $fileName): Endpoint {
         return new Endpoint($restricted, $httpMethod, $uri, $fileName);
@@ -23,7 +35,22 @@ final class Endpoint {
         $this->file = Bee::normalizePath($fileName, true);
     }
 
-    public function getRestricted(): bool { return $this->restricted; }
-    public function getComplexPath(): string { return $this->complexPath; }
-    public function getFile(): string { return $this->file; }
+    #/ INIT
+    #----------------------------------------------------------------------
+    
+    #----------------------------------------------------------------------
+    #\ PRIVATE FUNCTIONS
+
+
+
+    #/ PRIVATE FUNCTIONS
+    #----------------------------------------------------------------------
+
+    #----------------------------------------------------------------------
+    #\ METHODS
+
+
+
+    #/ METHODS
+    #----------------------------------------------------------------------
 }

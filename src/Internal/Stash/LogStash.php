@@ -2,16 +2,12 @@
 
 namespace SmartGoblin\Internal\Stash;
 
-final class HeaderStash {
-
+final class LogStash {
     #----------------------------------------------------------------------
     #\ VARIABLES
 
-    private array $headerList = [];
-        public function getHeaderList(): array { return $this->headerList; }
-
-    private array $removeHeaderList = [];
-        public function getRemoveHeaderList(): array { return $this->removeHeaderList; }
+    private array $logList = [];
+        public function getLogList(): array { return $this->logList; }
 
     #/ VARIABLES
     #----------------------------------------------------------------------
@@ -22,7 +18,7 @@ final class HeaderStash {
     public function  __construct() {
         
     }
-    
+
     #/ INIT
     #----------------------------------------------------------------------
     
@@ -30,24 +26,22 @@ final class HeaderStash {
     #\ PRIVATE FUNCTIONS
 
 
-    
+
     #/ PRIVATE FUNCTIONS
     #----------------------------------------------------------------------
 
     #----------------------------------------------------------------------
     #\ METHODS
 
-    public function addHeader(string $key, string $value): void {
-        $this->headerList[$key] = $value;
-    }
-
-    public function addHeaderToRemove(string $key): void {
-        $this->removeHeaderList[] = $key;
+    public function addLog(string $prefix, string $text): void {
+        $this->logList[] = [
+            "prefix" => $prefix,
+            "value" => $text
+        ];
     }
 
     public function empty(): void {
-        $this->headerList = [];
-        $this->removeHeaderList = [];
+        $this->logList = [];
     }
 
     #/ METHODS
