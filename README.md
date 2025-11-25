@@ -9,5 +9,5 @@
 - [ ] Test php-error-insight
 
 ## TODO: Bugs
-- [ ] Exception throws message to client in response.
+- [X] Exception throws message to client in response.
 - [X] 404 returns 500 instead?
