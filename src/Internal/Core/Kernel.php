@@ -77,12 +77,16 @@ final class Kernel {
         HeaderSlave::writeUtilityHeaders($this->request->isApi());
     }
 
-    public function close(Response $response): void {
+    public function close(?Response $response): void {
         session_write_close();
 
         if(!$response) {
-            $response = Response::new(false, 301);
-            HeaderWorker::writeHeader( "Location", "/".$this->config->getDefaultPathRedirect());
+            if($this->request->isApi()) {
+                $response = Response::new(false, 404);
+            } else {
+                $response = Response::new(false, 301);
+                HeaderWorker::writeHeader( "Location", $this->config->getDefaultPathRedirect());
+            }
         }
 
         http_response_code($response->getCode());

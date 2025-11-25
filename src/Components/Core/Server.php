@@ -9,6 +9,7 @@ use SmartGoblin\Internal\Core\Kernel;
 
 use SmartGoblin\Components\Core\Config;
 use SmartGoblin\Components\Http\Response;
+use SmartGoblin\Worker\LogWorker;
 
 final class Server {
     #----------------------------------------------------------------------
@@ -51,18 +52,16 @@ final class Server {
     #\ METHODS
 
     public function run(): void {
-        $response = null;
-        
         if ($this->ready) {
+            $response = null;
             $this->kernel->open();
 
             try {
-                
                 $response = $this->kernel->isApiRequest() ? $this->kernel->processApi() : $this->kernel->processView();
-
+                LogWorker::log($response ? "Request processed successfully" : "Request did not find matching route");
             } catch(BadImplementationException | EndpointFileDoesNotExist $e) {
                 $response = Response::new(false, 500);
-                $response->setBody($e->getMessage());
+                LogWorker::log("**ERROR** => " . $e->getMessage());
             }
             
             $this->kernel->close($response);

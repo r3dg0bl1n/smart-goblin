@@ -76,7 +76,7 @@ final class Config {
     }
 
     public function configureUnauthorizedRedirects(string $path, string $subdomain): void {
-        $this->defaultSubdomainRedirect = $path;
+        $this->defaultPathRedirect = $path;
         $this->defaultSubdomainRedirect = $subdomain;
     }
 

@@ -5,7 +5,9 @@
 - [ ] Allow for shared authorization between sites
 - [ ] Escalable router, allowing for hundreds of endpoints without performance drop
 - [X] Architecture is getting slower in local. Improve optimization. (It was my container...)
+- [ ] Default error behaviour Worker
+- [ ] Test php-error-insight
 
 ## TODO: Bugs
 - [ ] Exception throws message to client in response.
-- [ ] 404 returns 500 instead?
+- [X] 404 returns 500 instead?
