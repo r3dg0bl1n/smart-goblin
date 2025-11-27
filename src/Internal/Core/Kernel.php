@@ -6,6 +6,7 @@ use SmartGoblin\Components\Core\Config;
 use SmartGoblin\Components\Http\Response;
 use SmartGoblin\Components\Http\Request;
 use SmartGoblin\Components\Http\DataType;
+use SmartGoblin\Components\Core\Template;
 
 use SmartGoblin\Worker\AuthWorker;
 use SmartGoblin\Worker\HeaderWorker;
@@ -30,6 +31,8 @@ final class Kernel {
 
     private Config $config;
         public function setConfig(Config $config): void { $this->config = $config; }
+    private Template $template;
+        public function setTemplate(Template $template): void { $this->template = $template; }
 
     private Request $request;
     private float $startRequestTime;
@@ -152,10 +155,13 @@ final class Kernel {
         if ($foundEndpoint) {
             if($foundEndpoint->getRestricted() && !AuthWorker::isAuthorized($this->request)) throw new NotAuthorizedException("Not authorized to make this request.");
 
-            $filePath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR  . $foundEndpoint->getFile() . ".html";
-            if(!file_exists($filePath)) throw new EndpointFileDoesNotExist("View file could not be rendered, it does not exist. (Payload: $filePath)");
+            $template = $this->template;
 
-            readFile($filePath);
+            $template->setFile($this->config->getSitePath() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR  . $foundEndpoint->getFile() . ".html");
+            if(!file_exists($template->getFile())) throw new EndpointFileDoesNotExist("View file could not be rendered, it does not exist. (Payload: ".$template->getFile().")");
+
+            require_once __DIR__ . DIRECTORY_SEPARATOR . "Template" . DIRECTORY_SEPARATOR . "main.php";
+
             $response = Response::new(true, 200);
         }
 

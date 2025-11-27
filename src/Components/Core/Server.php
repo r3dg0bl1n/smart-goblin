@@ -33,8 +33,9 @@ final class Server {
         $this->kernel = new Kernel();
     }
 
-    public function configure(Config $config): void {
+    public function configure(Config $config, Template $template): void {
         $this->kernel->setConfig($config);
+        $this->kernel->setTemplate($template);
         $this->ready = true;
     }
 
