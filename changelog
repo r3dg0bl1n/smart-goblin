@@ -1,0 +1,12 @@
+### [v0.2] - 2025-12-09
+#### Added
+-
+
+#### Changed
+- 
+
+#### Fixed
+- Unauthorized redirect path not working for views, throws 403.
+
+#### Removed
+-

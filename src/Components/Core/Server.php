@@ -11,7 +11,9 @@ use SmartGoblin\Internal\Core\Kernel;
 use SmartGoblin\Components\Core\Config;
 use SmartGoblin\Components\Routing\Router;
 use SmartGoblin\Components\Http\Response;
+
 use SmartGoblin\Workers\LogWorker;
+use SmartGoblin\Workers\HeaderWorker;
 
 final class Server {
     #----------------------------------------------------------------------
@@ -88,7 +90,13 @@ final class Server {
                 $response = Response::new(false, 500);
                 LogWorker::error("-SG- " . $e->getMessage());
             } catch(NotAuthorizedException $e) {
-                $response = Response::new(false, 403, $e->getMessage());
+                if($this->kernel->isApiRequest()) {
+                    $response = Response::new(false, 401, $e->getMessage());
+                } else {
+                    $response = Response::new(false, 301, $e->getMessage());
+                    HeaderWorker::addHeader("Location", $this->kernel->getConfig()->getDefaultPathRedirect());
+                }
+               
                 LogWorker::error("-SG- " . $e->getMessage());
             }
             

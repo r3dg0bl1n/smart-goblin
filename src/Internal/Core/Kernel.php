@@ -31,6 +31,7 @@ final class Kernel {
     #\ VARIABLES
 
     private Config $config;
+        public function getConfig(): Config { return $this->config; }
         public function setConfig(Config $config): void { $this->config = $config; }
     private Template $template;
         public function setTemplate(Template $template): void { $this->template = $template; }
