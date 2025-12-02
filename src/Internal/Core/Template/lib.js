@@ -1,4 +1,4 @@
-function request(api, method, data = {}){
+function request(api, method, data = undefined){
     return new Promise(function(resolve, reject){
         $.ajax({
             url: api,
