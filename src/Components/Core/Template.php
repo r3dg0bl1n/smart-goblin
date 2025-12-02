@@ -170,10 +170,14 @@ final class Template {
      * @return string The JSON object containing the auto-fill information of the page.
      */
     public function getHtmlAutofill(): string { 
-        return json_encode(array_map(
-        fn($k) => (object)["dom" => $k, "api" => $this->autofill[$k]],
-        array_keys($this->autofill)
-        ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); 
+        $autofillList = [];
+        foreach ($this->autofill as $dom => $api) {
+            $autofillList[] = [
+                "dom" => $dom,
+                "api" => $api
+            ];
+        }
+        return json_encode($autofillList, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     }
 
     #/ METHODS
