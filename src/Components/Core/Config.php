@@ -37,6 +37,9 @@ final class Config {
     #----------------------------------------------------------------------
     #\ INIT
 
+
+    # TODO: Preload environment variables.
+
     /**
      * Create a new Config instance.
      *

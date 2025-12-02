@@ -11,6 +11,10 @@ final class Template {
         public function setFile(string $file): void { $this->file = $file; }
     private string $title = "";
         public function getTitle(): string { return $this->title; }
+    private string $version = "";
+        public function getVersion(): string { return $this->version; }
+    private string $lang = "";
+        public function getLang(): string { return $this->lang; }
     private string $favicon = "favicon.png";
         public function getFavicon(): string { return $this->favicon; }
         public function setFavicon(string $favicon): void { $this->favicon = $favicon; }
@@ -23,10 +27,12 @@ final class Template {
     private array $autofill = [];
         public function getAutofill(): array { return $this->autofill; }
         public function addAutofill(string $dom, string $api): void { $this->autofill[$dom] = $api; }
-    private string $version = "";
-        public function getVersion(): string { return $this->version; }
-    private string $lang = "";
-        public function getLang(): string { return $this->lang; }
+    private array $preDOMFiles = [];
+        public function getPreDOMFiles(): array { return $this->preDOMFiles; }
+        public function setPreDOMFiles(array $files): void { $this->preDOMFiles = $files; }
+    private array $postDOMFiles = [];
+        public function getPostDOMFiles(): array { return $this->postDOMFiles; }
+        public function setPostDOMFiles(array $files): void { $this->postDOMFiles = $files; }
 
     #/ VARIABLES
     #----------------------------------------------------------------------

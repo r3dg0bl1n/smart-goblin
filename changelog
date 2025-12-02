@@ -1,6 +1,7 @@
 ### [v0.2] - 2025-12-09
 #### Added
 - Configuration of path redirects for 404 error.
+- Support for .html template injection before and after #main div.
 
 #### Changed
 - Template::oneline() is now Template::flex(), allowing for dynamic creation of templates.

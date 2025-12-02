@@ -37,7 +37,7 @@ OR (not recommended)
 - Upgrade of DataWorker: new methods and SQL uses.
 - Upgrade of Endpoint component: add dynamic usage and data filtering.
 - Upgrade of Router component: refactor to support more complex architectures.
-- Upgrade of Template component: increase template capabilities and flexibility on creation.
+- ~~Upgrade of Template component: increase template capabilities and flexibility on creation.~~
 - Addition of automation script for Apache deployment.
 
 ---
