@@ -126,4 +126,41 @@ class BeeTest extends TestCase
             'dots in filename' => ['path/to/file.txt', 'path/to/file.txt'],
         ];
     }
+
+    public function testGetBaseDomainReturnsCorrectBaseDomain(): void
+    {
+        $_ENV['SITE_ADDRESS'] = 'sub.example.com';
+        $this->assertEquals('example.com', Bee::getBaseDomain());
+
+        $_ENV['SITE_ADDRESS'] = 'example.com';
+        $this->assertEquals('example.com', Bee::getBaseDomain());
+
+        $_ENV['SITE_ADDRESS'] = 'localhost';
+        $this->assertEquals('localhost', Bee::getBaseDomain());
+
+        $_ENV['SITE_ADDRESS'] = 'deep.subdomain.example.co.uk';
+        $this->assertEquals('co.uk', Bee::getBaseDomain());
+    }
+
+    public function testGetBaseDomainReturnsLocalhostWhenNotSet(): void
+    {
+        unset($_ENV['SITE_ADDRESS']);
+
+        $result = Bee::getBaseDomain();
+
+        $this->assertEquals('localhost', $result);
+    }
+
+    public function testGetBuiltDomainReturnsCorrectBuiltDomain(): void
+    {
+        $_ENV['SITE_ADDRESS'] = 'example.com';
+
+        // Test with subdomain
+        $resultWithSubdomain = Bee::getBuiltDomain('sub');
+        $this->assertEquals('sub.example.com', $resultWithSubdomain);
+
+        // Test without subdomain
+        $resultWithoutSubdomain = Bee::getBuiltDomain();
+        $this->assertEquals('example.com', $resultWithoutSubdomain);
+    }
 }

@@ -72,6 +72,41 @@ class Bee {
         return implode("/", $normalized);
     }
 
+    /**
+     * Returns the base domain of the site from the SITE_ADDRESS environment variable.
+     * If the SITE_ADDRESS environment variable is not set, returns "localhost".
+     * If the SITE_ADDRESS environment variable is set to a domain with 3 or more parts (e.g., "sub.example.com"), returns the last 2 parts of the domain (e.g., "example.com").
+     *
+     * @return string the base domain of the site
+     */
+    public static function getBaseDomain(): string {
+        $host = Bee::env("SITE_ADDRESS", "localhost");
+        $parts = explode(".", $host);
+        $count = count($parts);
+
+        if ($count >= 3) {
+            $domain = array_slice($parts, -2);
+            return implode(".", $domain);
+        }
+
+        return $host;
+    }
+
+    /**
+     * Returns the built domain of the site based on the SITE_ADDRESS environment variable and the $subdomain parameter.
+     * If the $subdomain parameter is empty, returns the base domain of the site.
+     * If the $subdomain parameter is not empty, returns the built domain by concatenating the $subdomain parameter with the base domain of the site.
+     *
+     * @param string $subdomain the subdomain to use for the built domain
+     * 
+     * @return string the built domain of the site
+     */
+    public static function getBuiltDomain(string $subdomain = ""): string {
+        $baseDomain = Bee::getBaseDomain();
+        if ($subdomain === "") return $baseDomain;
+        else return $subdomain . "." . $baseDomain;
+    }
+
     #/ METHODS
     #----------------------------------------------------------------------
 }

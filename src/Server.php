@@ -103,7 +103,9 @@ final class Server {
     // I don't like this...
     private function getUnauthorizedResponse(bool $domainLevel, string $msg): Response {
         $response = null;
-        $redirect = $domainLevel ? $this->kernel->getConfig()->getDefaultUnauthorizedSubdomainRedirect() : $this->kernel->getConfig()->getDefaultUnauthorizedPathRedirect();
+        $redirect = $domainLevel
+            ? "https://".Bee::getBuiltDomain($this->kernel->getConfig()->getDefaultUnauthorizedSubdomainRedirect())
+            : $this->kernel->getConfig()->getDefaultUnauthorizedPathRedirect();
         if($this->kernel->isApiRequest()) {
             $response = Response::new(false, 401, $msg);
         } else {
