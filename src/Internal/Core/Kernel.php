@@ -22,10 +22,6 @@ use SmartGoblin\Exceptions\BadImplementationException;
 use SmartGoblin\Exceptions\EndpointFileDoesNotExist;
 use SmartGoblin\Exceptions\NotAuthorizedException;
 
-use SmartGoblin\Workers\Bee;
-
-use Dotenv\Dotenv;
-
 final class Kernel {
     #----------------------------------------------------------------------
     #\ VARIABLES
@@ -85,13 +81,6 @@ final class Kernel {
      */
     public function open(): void {
         $this->startRequestTime = microtime(true);
-
-        define("SITE_PATH", $this->config->getSitePath());
-
-        $envPath = $this->config->getSitePath() . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR;
-
-        Dotenv::createImmutable($envPath, ".env")->safeLoad();
-        Dotenv::createImmutable($envPath, Bee::isDev() ? ".env.dev" : ".env.prod")->safeLoad();
 
         // Add security for remote address
         $this->request = new Request($_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], file_get_contents("php://input"), $_SERVER["REMOTE_ADDR"]);

@@ -25,7 +25,7 @@ OR (not recommended)
 ---
 
 ### Roadmap: v0.2-alpha
-- Modification of Server component, adherence to architecture principles.
+- ~~Modification of Server component, adherence to architecture principles.~~
 - Improvement and standardization of exception handling.
 - Improvement of URI parsing.
 - Improvement of chache handling.

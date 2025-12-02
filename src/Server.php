@@ -1,6 +1,6 @@
 <?php
 
-namespace SmartGoblin\Components\Core;
+namespace SmartGoblin;
 
 use SmartGoblin\Exceptions\BadImplementationException;
 use SmartGoblin\Exceptions\EndpointFileDoesNotExist;
@@ -9,11 +9,15 @@ use SmartGoblin\Exceptions\NotAuthorizedException;
 use SmartGoblin\Internal\Core\Kernel;
 
 use SmartGoblin\Components\Core\Config;
+use SmartGoblin\Components\Core\Template;
 use SmartGoblin\Components\Routing\Router;
 use SmartGoblin\Components\Http\Response;
 
 use SmartGoblin\Workers\LogWorker;
 use SmartGoblin\Workers\HeaderWorker;
+
+use SmartGoblin\Workers\Bee;
+use Dotenv\Dotenv;
 
 final class Server {
     #----------------------------------------------------------------------
@@ -29,11 +33,28 @@ final class Server {
     #\ INIT
 
     /**
+     * Preloads the environment configuration.
+     *
+     * This function is used to load the configuration from the .env files before the server is configured.
+     * It is useful for setting up the environment variables before the server is configured.
+     *
+     * @param string $sitePath The local path of the site. Use __DIR__ unless you know what you are doing.
+     */
+    public static function preload(string $sitePath): void {
+        define("SITE_PATH", $sitePath);
+
+        $envPath = $sitePath . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR;
+
+        Dotenv::createImmutable($envPath, ".env")->safeLoad();
+        Dotenv::createImmutable($envPath, Bee::isDev() ? ".env.dev" : ".env.prod")->safeLoad();
+    }
+
+    /**
      * Creates a new instance of the Server class.
      *
      * @return Server
      */
-    public static function new(): Server {
+    public static function createInstance(): Server {
         return new Server();
     }
 

@@ -7,8 +7,6 @@ final class Config {
     #----------------------------------------------------------------------
     #\ VARIABLES
 
-    private string $sitePath;
-        public function getSitePath(): string { return $this->sitePath; }
     private string $siteName;
         public function getSiteName(): string { return $this->siteName; }
     private bool $restricted;
@@ -37,24 +35,19 @@ final class Config {
     #----------------------------------------------------------------------
     #\ INIT
 
-
-    # TODO: Preload environment variables.
-
     /**
      * Create a new Config instance.
      *
-     * @param string $sitePath   The local path of the site. Use __DIR__ unless you know what you are doing.
-     * @param string $siteName   The name of the site.
+     * @param string $siteName   The name of the site (e.g., "main", "admin").
      * @param bool $restricted   Whether the site requires authorization or not.
      *
      * @return Config
      */
-    public static function new(string $sitePath, string $siteName, bool $restricted): Config {
-        return new Config($sitePath, $siteName, $restricted);
+    public static function new(string $siteName, bool $restricted): Config {
+        return new Config($siteName, $restricted);
     }
 
-    private function  __construct(string $sitePath, string $siteName, bool $restricted) {
-        $this->sitePath = $sitePath;
+    private function  __construct(string $siteName, bool $restricted) {
         $this->siteName = $siteName;
         $this->restricted = $restricted;
     }
