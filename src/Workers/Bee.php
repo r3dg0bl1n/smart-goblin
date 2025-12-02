@@ -36,8 +36,8 @@ class Bee {
      * @param string $key the key of the environment variable
      * @return string the value of the environment variable or empty string if not found
      */
-    public static function env(string $key): string {
-        return $_ENV[$key] ?? "";
+    public static function env(string $key, string $default = ""): string {
+        return $_ENV[$key] ?? $default;
     }
     /**
      * Checks if the application is running in a development environment
