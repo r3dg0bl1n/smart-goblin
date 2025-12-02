@@ -5,6 +5,7 @@
 - Server::preload(__DIR__) for loading environment configuration.
 - Server::getConfiguration(), Server::getTemplate(), Server::getViewRouter(), Server::getApiRouter() for modular loading.
 - Test suite added.
+- Feature to enable authorization across parent domain and all subdomains.
 
 #### Changed
 - Template::oneline() is now Template::flex(), allowing for dynamic creation of templates.

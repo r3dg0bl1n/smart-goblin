@@ -82,11 +82,19 @@ final class Config {
      * @param string $sessionName   The name of the session to use for authorization.
      * @param int $expiryDays       The number of days the authorization session should last.
      * @param string $domain        The domain to use for the authorization session.
+     * @param bool $globalAuth      Whether the authorization should be valid across the parent domain and all subdomains.
+     *                              (e.g. "example.com" becomes ".example.com", "lin.sub.example.com" becomes ".sub.example.com")
      */
-    public function configureAuthorization(string $sessionName, int $expiryDays, string $domain): void {
+    public function configureAuthorization(string $sessionName, int $expiryDays, string $domain, bool $globalAuth = false): void {
         $this->authSessionName = $sessionName;
         $this->authExpiryDays = $expiryDays;
-        $this->authDomain = $domain;
+        if ($globalAuth) {
+            $this->authDomain = count(explode(".", $domain)) > 2
+                ? "." . substr($domain, strpos($domain, ".") + 1)
+                : "." . $domain;
+        } else {
+            $this->authDomain = $domain;
+        }
     }
 
     /**

@@ -71,6 +71,42 @@ class ConfigTest extends TestCase
         $this->assertEquals('localhost', $config->getAuthDomain());
     }
 
+        public function testDefaultAuthDomainWithoutGlobalAuth(): void
+    {
+        $config = Config::new('test', false);
+
+        $config->configureAuthorization('SESSION', 7, 'example.com', false);
+
+        $this->assertEquals('example.com', $config->getAuthDomain());
+    }
+
+    public function testDefaultAuthDomainWithGlobalAuth(): void
+    {
+        $config = Config::new('test', false);
+
+        $config->configureAuthorization('SESSION', 7, 'example.com', true);
+
+        $this->assertEquals('.example.com', $config->getAuthDomain());
+    }
+
+    public function testDefaultAuthDomainWithGlobalAuthComplex(): void
+    {
+        $config = Config::new('test', false);
+
+        $config->configureAuthorization('SESSION', 7, 'sub.example.com', true);
+
+        $this->assertEquals('.example.com', $config->getAuthDomain());
+    }
+
+        public function testDefaultAuthDomainWithGlobalAuthComplex2(): void
+    {
+        $config = Config::new('test', false);
+
+        $config->configureAuthorization('SESSION', 7, 'min.sub.example.com', true);
+
+        $this->assertEquals('.sub.example.com', $config->getAuthDomain());
+    }
+
     public function testConfigureAuthorizationSetsSessionName(): void
     {
         $config = Config::new('test', false);
