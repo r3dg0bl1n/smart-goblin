@@ -24,10 +24,12 @@ final class Config {
     private string $authDomain = "localhost";
          public function getAuthDomain(): string { return $this->authDomain; }
 
-    private string $defaultPathRedirect = "/login";
-        public function getDefaultPathRedirect(): string { return $this->defaultPathRedirect; }
-    private string $defaultSubdomainRedirect = "";
-        public function getDefaultSubdomainRedirect(): string { return $this->defaultSubdomainRedirect; }
+    private string $defaultNotFoundPathRedirect = "/";
+        public function getDefaultNotFoundPathRedirect(): string { return $this->defaultNotFoundPathRedirect; }
+    private string $defaultUnauthorizedPathRedirect = "/login";
+        public function getDefaultUnauthorizedPathRedirect(): string { return $this->defaultUnauthorizedPathRedirect; }
+    private string $defaultUnauthorizedSubdomainRedirect = "";
+        public function getDefaultUnauthorizedSubdomainRedirect(): string { return $this->defaultUnauthorizedSubdomainRedirect; }
 
     #/ VARIABLES
     #----------------------------------------------------------------------
@@ -91,14 +93,23 @@ final class Config {
     }
 
     /**
+     * Configure the default not found redirect settings.
+     *
+     * @param string $path      The path to redirect not found requests to.
+     */
+    public function configureNotFoundRedirects(string $path): void {
+        $this->defaultNotFoundPathRedirect = $path;
+    }
+
+    /**
      * Configure the default unauthorized redirect settings.
      *
      * @param string $path      The path to redirect unauthorized requests to.
      * @param string $subdomain The subdomain to redirect unauthorized requests to. Leave empty to use the main domain.
      */
     public function configureUnauthorizedRedirects(string $path, string $subdomain = ""): void {
-        $this->defaultPathRedirect = $path;
-        $this->defaultSubdomainRedirect = $subdomain;
+        $this->defaultUnauthorizedPathRedirect = $path;
+        $this->defaultUnauthorizedSubdomainRedirect = $subdomain;
     }
 
     #/ METHODS

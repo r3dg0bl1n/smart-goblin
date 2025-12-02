@@ -63,7 +63,32 @@ final class Server {
     #----------------------------------------------------------------------
     #\ PRIVATE FUNCTIONS
 
+    // I don't like this...
+    private function getUnauthorizedResponse(bool $domainLevel, string $msg): Response {
+        $response = null;
+        $redirect = $domainLevel ? $this->kernel->getConfig()->getDefaultUnauthorizedSubdomainRedirect() : $this->kernel->getConfig()->getDefaultUnauthorizedPathRedirect();
+        if($this->kernel->isApiRequest()) {
+            $response = Response::new(false, 401, $msg);
+        } else {
+            $response = Response::new(false, 301, $msg);
+            HeaderWorker::addHeader("Location", $redirect);
+        }
 
+        return $response;
+    }
+
+    // Or this ._.
+    private function getNotFoundResponse(): Response {
+        $response = null;
+        if($this->kernel->isApiRequest()) {
+            $response = Response::new(false, 404, "Request not found");
+        } else {
+            $response = Response::new(false, 301);
+            HeaderWorker::addHeader("Location", $this->kernel->getConfig()->getDefaultNotFoundPathRedirect());
+        }
+
+        return $response;
+    }
 
     #/ PRIVATE FUNCTIONS
     #----------------------------------------------------------------------
@@ -81,22 +106,28 @@ final class Server {
     public function run(): void {
         if ($this->ready) {
             $response = null;
-            $this->kernel->open();
+            try {
+                $this->kernel->open();
+            } catch(NotAuthorizedException $e) {
+                $response = $this->getUnauthorizedResponse(true, $e->getMessage());
+                LogWorker::error("-SG- " . $e->getMessage());
+            }
+            
 
             try {
                 $response = $this->kernel->process();
-                LogWorker::log($response ? "-SG- Request processed successfully" : "-SG- Request did not find matching route");
+                if($response === null) { 
+                    $response = $this->getNotFoundResponse();
+                    LogWorker::warning("-SG- Request did not find matching route");
+                } else {
+                    LogWorker::log("-SG- Request processed successfully");
+                }
+                
             } catch(BadImplementationException | EndpointFileDoesNotExist $e) {
                 $response = Response::new(false, 500);
                 LogWorker::error("-SG- " . $e->getMessage());
             } catch(NotAuthorizedException $e) {
-                if($this->kernel->isApiRequest()) {
-                    $response = Response::new(false, 401, $e->getMessage());
-                } else {
-                    $response = Response::new(false, 301, $e->getMessage());
-                    HeaderWorker::addHeader("Location", $this->kernel->getConfig()->getDefaultPathRedirect());
-                }
-               
+                $response = $this->getUnauthorizedResponse(false, $e->getMessage());
                 LogWorker::error("-SG- " . $e->getMessage());
             }
             

@@ -99,12 +99,14 @@ final class Kernel {
         $this->logSlave = LogSlave::zap();
         $this->logSlave->writeOpenLogs($this->request);
 
+        $this->authSlave = AuthSlave::zap();
+        $this->authSlave->initializeSessionCookie($this->config->getAuthSessionName(), $this->config->getAuthLifetime(), $this->config->getAuthDomain());
+
+        if($this->config->isRestricted() && !AuthWorker::isAuthorized($this->request)) throw new NotAuthorizedException("Not authorized to make this request.");
+
         $this->headerSlave = HeaderSlave::zap();
         $this->headerSlave->writeSecurityHeaders($this->config->getAllowedHosts(), $_SERVER["HTTPS"], $_SERVER["HTTP_ORIGIN"] ?? "");
         $this->headerSlave->writeUtilityHeaders($this->request->isApi());
-
-        $this->authSlave = AuthSlave::zap();
-        $this->authSlave->initializeSessionCookie($this->config->getAuthSessionName(), $this->config->getAuthLifetime(), $this->config->getAuthDomain());
 
         $this->dataSlave = DataSlave::zap();
 
@@ -164,20 +166,10 @@ final class Kernel {
      * If the request is an API request, it will generate a 404 response.
      * If the request is not an API request, it will generate a 301 response with a default path redirect.
      *
-     * @param Response|null $response The response to output, or null if no response could be generated.
+     * @param Response$response The response to output or process
      */
-    public function close(?Response $response): void {
+    public function close(Response $response): void {
         session_write_close();
-
-        if(!$response) {
-            if($this->request->isApi()) {
-                $response = Response::new(false, 404);
-            } else {
-                $response = Response::new(false, 301);
-                HeaderWorker::addHeader( "Location", $this->config->getDefaultPathRedirect());
-            }
-        }
-        
         http_response_code($response->getCode());
 
         $type = $this->request->isApi() ? DataType::JSON : DataType::HTML;
