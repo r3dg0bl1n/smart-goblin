@@ -4,6 +4,7 @@
 - Support for .html template injection before and after #main div.
 - Server::preload(__DIR__) for loading environment configuration.
 - Server::getConfiguration(), Server::getTemplate(), Server::getViewRouter(), Server::getApiRouter() for modular loading.
+- Test suite added.
 
 #### Changed
 - Template::oneline() is now Template::flex(), allowing for dynamic creation of templates.
