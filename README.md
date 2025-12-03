@@ -24,7 +24,7 @@ OR (not recommended)
 
 ---
 
-### Roadmap: v0.2-alpha
+### Roadmap: v0.2
 - ~~Modification of Server component, adherence to architecture principles.~~
 - ~~Improvement and standardization of exception handling.~~
 - ~~Improvement of URI parsing.~~
@@ -36,9 +36,14 @@ OR (not recommended)
 - ~~Upgrade of AuthWorker: new methods, automatic encryption.~~
 - Upgrade of DataWorker: new methods and SQL uses.
 - Upgrade of Endpoint component: add dynamic usage and data filtering.
-- Upgrade of Router component: refactor to support more complex architectures.
 - ~~Upgrade of Template component: increase template capabilities and flexibility on creation.~~
 - Addition of automation script for Apache deployment.
+- Standarization of JS native libraries for increased compatibility.
+
+### Roadmap: v0.3
+
+### Roadmap: v1.0
+- Upgrade of Router component: refactor to support more complex architectures.
 
 ---
 
