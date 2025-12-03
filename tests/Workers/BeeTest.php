@@ -163,4 +163,89 @@ class BeeTest extends TestCase
         $resultWithoutSubdomain = Bee::getBuiltDomain();
         $this->assertEquals('example.com', $resultWithoutSubdomain);
     }
+
+    public function testHashPasswordReturnsNonEmptyString(): void
+    {
+        $password = 'mySecurePassword123';
+        
+        $hash = Bee::hashPassword($password);
+        
+        $this->assertNotEmpty($hash);
+        $this->assertIsString($hash);
+    }
+
+    public function testHashPasswordGeneratesDifferentHashesForSamePassword(): void
+    {
+        $password = 'mySecurePassword123';
+        
+        $hash1 = Bee::hashPassword($password);
+        $hash2 = Bee::hashPassword($password);
+        
+        // Each hash should be unique due to random salt
+        $this->assertNotEquals($hash1, $hash2);
+    }
+
+    public function testHashPasswordCanBeVerifiedWithPasswordVerify(): void
+    {
+        $password = 'mySecurePassword123';
+        
+        $hash = Bee::hashPassword($password);
+        
+        // Verify the password matches the hash
+        $this->assertTrue(password_verify($password, $hash));
+        
+        // Verify wrong password doesn't match
+        $this->assertFalse(password_verify('wrongPassword', $hash));
+    }
+
+    public function testHashPasswordUsesArgon2IDAlgorithm(): void
+    {
+        $password = 'mySecurePassword123';
+        
+        $hash = Bee::hashPassword($password);
+        
+        // Argon2ID hashes start with $argon2id$
+        $this->assertStringStartsWith('$argon2id$', $hash);
+    }
+
+    public function testHashPasswordHandlesEmptyPassword(): void
+    {
+        $password = '';
+        
+        $hash = Bee::hashPassword($password);
+        
+        $this->assertNotEmpty($hash);
+        $this->assertTrue(password_verify($password, $hash));
+    }
+
+    public function testHashPasswordHandlesSpecialCharacters(): void
+    {
+        $password = '!@#$%^&*()_+-=[]{}|;:\'",.<>?/~`';
+        
+        $hash = Bee::hashPassword($password);
+        
+        $this->assertNotEmpty($hash);
+        $this->assertTrue(password_verify($password, $hash));
+    }
+
+    public function testHashPasswordHandlesUnicodeCharacters(): void
+    {
+        $password = 'пароль密码🔒';
+        
+        $hash = Bee::hashPassword($password);
+        
+        $this->assertNotEmpty($hash);
+        $this->assertTrue(password_verify($password, $hash));
+    }
+
+    public function testHashPasswordHandlesLongPassword(): void
+    {
+        // Create a very long password (1000 characters)
+        $password = str_repeat('a', 1000);
+        
+        $hash = Bee::hashPassword($password);
+        
+        $this->assertNotEmpty($hash);
+        $this->assertTrue(password_verify($password, $hash));
+    }
 }

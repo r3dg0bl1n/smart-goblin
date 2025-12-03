@@ -7,6 +7,7 @@
 - Test suite added.
 - Feature to enable authorization across parent domain and all subdomains.
 - Bee::getBaseDomain() and Bee::getBuiltDomain(...) for getting base domain and subdomain.
+- Bee::hashPassword(...) and AuthWorker::autologin(...) for automatic password hashing and auto-login.
 
 #### Changed
 - Template::oneline() is now Template::flex(), allowing for dynamic creation of templates.

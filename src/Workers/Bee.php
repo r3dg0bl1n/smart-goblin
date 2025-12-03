@@ -107,6 +107,17 @@ class Bee {
         else return $subdomain . "." . $baseDomain;
     }
 
+    /**
+     * Hashes a password using the Argon2ID algorithm with a memory cost of 2^16, a time cost of 4 and 2 threads.
+     * 
+     * @param string $password the password to hash
+     * 
+     * @return string the hashed password
+     */
+    public static function hashPassword(string $password): string {
+        return password_hash($password, PASSWORD_ARGON2ID, ['memory_cost' => 1 << 16, 'time_cost' => 4, 'threads' => 2]);
+    }
+
     #/ METHODS
     #----------------------------------------------------------------------
 }
