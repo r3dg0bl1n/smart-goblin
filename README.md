@@ -35,7 +35,6 @@ OR (not recommended)
 - Implementation of unauthorized flow with redirects after login.
 - ~~Upgrade of AuthWorker: new methods, automatic encryption.~~
 - ~~Upgrade of DataWorker: new methods and SQL uses.~~
-- Upgrade of Endpoint component: add dynamic usage and data filtering.
 - ~~Upgrade of Template component: increase template capabilities and flexibility on creation.~~
 - Addition of automation script for Apache deployment.
 - ~~Standarization of JS native libraries for increased compatibility.~~
