@@ -1,6 +1,6 @@
 # FastRaven  
 **State:** use only for personal projects  
-**Version:** v0.1-alpha  
+**Version:** v0.2  
 
 FastRaven is a minimalistic and fast PHP framework for **monolithic apps**.  
 It focuses on simplicity, clarity, and raw performance: no unnecessary layers, no dependencies you don’t control.
@@ -23,20 +23,6 @@ OR (not recommended)
 1. `composer require fast-raven/library` : Install fast-raven framework inside existing composer project.
 
 ---
-
-### Roadmap: v0.2
-- ~~Modification of Server component, adherence to architecture principles.~~
-- ~~Improvement and standardization of exception handling.~~
-- ~~Improvement of URI parsing.~~
-- ~~Improvement of chache handling.~~
-- ~~Improvement of dev and prod domain configuration.~~
-- ~~Implementation of typed shared authorization between diferent sites.~~
-- ~~Implementation of API security headers for allowed hosts.~~
-- ~~Upgrade of AuthWorker: new methods, automatic encryption.~~
-- ~~Upgrade of DataWorker: new methods and SQL uses.~~
-- ~~Upgrade of Template component: increase template capabilities and flexibility on creation.~~
-- ~~Addition of automation script for Apache deployment.~~
-- ~~Standarization of JS native libraries for increased compatibility.~~
 
 ### Roadmap: v0.3
 - Improvement of typed arguments in DataWorker conditions and values.
